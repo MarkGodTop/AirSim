@@ -1,0 +1,117 @@
+{
+	"SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+	"SettingsVersion": 1.2,
+	"SimMode": "Multirotor",
+	"ViewMode": "SpringArmChase",
+	"ClockSpeed": 1.0,
+	"Vehicles":
+	{
+		"drone_1":
+		{
+			"VehicleType": "SimpleFlight",
+			"DefaultVehicleState": "Armed",
+			"EnableCollisionPassthrogh": false,
+			"EnableCollisions": true,
+			"AllowAPIAlways": true,
+			"RC":
+			{
+				"RemoteControlID": 0,
+				"AllowAPIWhenDisconnected": false
+			},
+			"Sensors":
+			{
+				"LidarSensor1":
+				{
+					"SensorType": 6,
+					"Range": 50,
+					"Enabled": true,
+					"NumberOfChannels": 16,
+					"RotationsPerSecond": 10,
+					"PointsPerSecond": 300000,
+					"X": 0,
+					"Y": 0,
+					"Z": -1,
+					"Roll": 0,
+					"Pitch": 0,
+					"Yaw": 0,
+					"VerticalFOVUpper": 15,
+					"VerticalFOVLower": -15,
+					"HorizontalFOVStart": -180,
+					"HorizontalFOVEnd": 180,
+					"DrawDebugPoints": false,
+					"DataFrame": "SensorLocalFrame"
+				},
+				"Imu":
+				{
+					"SensorType": 2,
+					"Enabled": true,
+					"AngularRandomWalk": 0.29999999999999999,
+					"GyroBiasStabilityTau": 500,
+					"GyroBiasStability": 4.5999999999999996,
+					"VelocityRandomWalk": 0.23999999999999999,
+					"AccelBiasStabilityTau": 800,
+					"AccelBiasStability": 36
+				},
+				"Gps": {
+					"SensorType": 3,
+					"Enabled": true,
+					"EphTimeConstant": 0.9,
+					"EpvTimeConstant": 0.9,
+					"EphInitial": 25,
+					"EpvInitial": 25,
+					"EphFinal": 0.1,
+					"EpvFinal": 0.1,
+					"EphMin3d": 3,
+					"EphMin2d": 4,
+					"UpdateLatency": 0.2,
+					"UpdateFrequency": 50,
+					"StartupDelay": 1
+				  },
+				  "Magnetometer": {
+					"SensorType": 4,
+					"Enabled": true,
+					"NoiseSigma": 0.005,
+					"ScaleFactor": 1,
+					"NoiseBias": 0,
+					"UpdateLatency": 0,
+					"UpdateFrequency": 50,
+					"StartupDelay": 0
+				  }
+			},
+			"Cameras":
+			{
+				"front_center_custom":
+				{
+					"CaptureSettings": [
+						{
+							"PublishToRos": 1,
+							"ImageType": 0,
+							"Width": 800,
+							"Height": 600,
+							"FOV_Degrees": 90,
+							"DepthOfFieldFstop": 2.7999999999999998,
+							"DepthOfFieldFocalDistance": 200,
+							"DepthOfFieldFocalRegion": 200,
+							"TargetGamma": 1,
+							"AutoExposureSpeed": 100,
+							"MotionBlurAmount": 0,
+							"TargetFps": 60
+						}
+					],
+					"X": 0.5,
+					"Y": 0,
+					"Z": 0,
+					"Pitch": 0,
+					"Roll": 0,
+					"Yaw": 0
+				}
+			},
+			"X": 0,
+			"Y": 0,
+			"Z": 0,
+			"Pitch": 0,
+			"Roll": 0,
+			"Yaw": 0
+		}
+	}
+}
