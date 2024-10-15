@@ -12,6 +12,14 @@
 #include "safety/SafetyEval.hpp"
 #include "api/WorldSimApiBase.hpp"
 
+#include "sensors/barometer/BarometerBase.hpp"
+#include "sensors/distance/DistanceBase.hpp"
+#include "sensors/gps/GpsBase.hpp"
+#include "sensors/imu/ImuBase.hpp"
+#include "sensors/lidar/LidarBase.hpp"
+#include "sensors/magnetometer/MagnetometerBase.hpp"
+
+#include "rpc/msgpack/adaptor/define_decl.hpp"
 #include "common/common_utils/WindowsApisCommonPre.hpp"
 #include "rpc/msgpack.hpp"
 #include "common/common_utils/WindowsApisCommonPost.hpp"
@@ -91,7 +99,7 @@ namespace airlib_rpclib
             msr::airlib::TTimePoint time_stamp = 0;
             std::string object_name;
             int object_id = -1;
-
+            
             MSGPACK_DEFINE_MAP(has_collided, penetration_depth, time_stamp, normal, impact_point, position, object_name, object_id);
 
             CollisionInfo()

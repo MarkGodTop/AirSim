@@ -11,6 +11,11 @@ namespace msr
 {
 namespace airlib
 {
+    enum class LandedState : uint
+    {
+        Landed = 0,
+        Flying = 1
+    };
 
     //velocity
     struct Twist

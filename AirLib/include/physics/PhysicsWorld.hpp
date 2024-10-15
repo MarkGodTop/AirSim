@@ -91,11 +91,6 @@ namespace airlib
             world_.pause(is_paused);
         }
 
-        void pauseForReplay(bool is_paused)
-        {
-            world_.pauseForReplay(is_paused);
-        }
-        
         bool isPaused() const
         {
             return world_.isPaused();

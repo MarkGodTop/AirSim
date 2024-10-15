@@ -15,7 +15,7 @@ namespace airlib
     {
     public:
         ImuBase(const std::string& sensor_name = "")
-            : SensorBase(sensor_name)
+            : SensorBase(sensor_name), output_()
         {
         }
 

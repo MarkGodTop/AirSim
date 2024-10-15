@@ -41,11 +41,15 @@ AirsimROSWrapper::AirsimROSWrapper(const ros::NodeHandle& nh, const ros::NodeHan
 {
     ros_clock_.clock.fromSec(0);
 
-    if (AirSimSettings::singleton().simmode_name != AirSimSettings::kSimModeTypeCar) {
+    if (AirSimSettings::singleton().simmode_name == AirSimSettings::kSimModeTypeMultirotor) {
         airsim_mode_ = AIRSIM_MODE::DRONE;
         ROS_INFO("Setting ROS wrapper to DRONE mode");
     }
-    else {
+    if (AirSimSettings::singleton().simmode_name == AirSimSettings::kSimModeTypeJSBSim) {
+        airsim_mode_ = AIRSIM_MODE::JSBSIM;
+        ROS_INFO("Setting ROS wrapper to JSBSIM mode");
+    }
+    if (AirSimSettings::singleton().simmode_name == AirSimSettings::kSimModeTypeCar) {
         airsim_mode_ = AIRSIM_MODE::CAR;
         ROS_INFO("Setting ROS wrapper to CAR mode");
     }
@@ -63,7 +67,10 @@ void AirsimROSWrapper::initialize_airsim()
         if (airsim_mode_ == AIRSIM_MODE::DRONE) {
             airsim_client_ = std::unique_ptr<msr::airlib::RpcLibClientBase>(new msr::airlib::MultirotorRpcLibClient(host_ip_));
         }
-        else {
+        if (airsim_mode_ == AIRSIM_MODE::JSBSIM) {
+            airsim_client_ = std::unique_ptr<msr::airlib::RpcLibClientBase>(new msr::airlib::JSBSimRpcLibClient(host_ip_));
+        }
+        if (airsim_mode_ == AIRSIM_MODE::CAR) {
             airsim_client_ = std::unique_ptr<msr::airlib::RpcLibClientBase>(new msr::airlib::CarRpcLibClient(host_ip_));
         }
         airsim_client_->confirmConnection();
@@ -139,7 +146,10 @@ void AirsimROSWrapper::create_ros_pubs_from_settings_json()
         if (airsim_mode_ == AIRSIM_MODE::DRONE) {
             vehicle_ros = std::unique_ptr<MultiRotorROS>(new MultiRotorROS());
         }
-        else {
+        if (airsim_mode_ == AIRSIM_MODE::JSBSIM) {
+            vehicle_ros = std::unique_ptr<JSBSimROS>(new JSBSimROS());
+        }
+        if (airsim_mode_ == AIRSIM_MODE::CAR) {
             vehicle_ros = std::unique_ptr<CarROS>(new CarROS());
         }
 
@@ -184,7 +194,10 @@ void AirsimROSWrapper::create_ros_pubs_from_settings_json()
 
             // vehicle_ros.reset_srvr = nh_private_.advertiseService(curr_vehicle_name + "/reset",&AirsimROSWrapper::reset_srv_cb, this);
         }
-        else {
+        if (airsim_mode_ == AIRSIM_MODE::JSBSIM) {
+        
+        }
+        if (airsim_mode_ == AIRSIM_MODE::CAR) {
             auto car = static_cast<CarROS*>(vehicle_ros.get());
             car->car_cmd_sub = nh_private_.subscribe<airsim_ros_pkgs::CarControls>(
                 curr_vehicle_name + "/car_cmd",
@@ -737,7 +750,38 @@ nav_msgs::Odometry AirsimROSWrapper::get_odom_msg_from_multirotor_state(const ms
 
     return odom_msg;
 }
+nav_msgs::Odometry AirsimROSWrapper::get_odom_msg_from_jsbsim_state(const msr::airlib::JSBSimApiBase::JSBSimState& jsb_state) const
+{
+    nav_msgs::Odometry odom_msg;
 
+    odom_msg.pose.pose.position.x = jsb_state.getPosition().x();
+    odom_msg.pose.pose.position.y = jsb_state.getPosition().y();
+    odom_msg.pose.pose.position.z = jsb_state.getPosition().z();
+    odom_msg.pose.pose.orientation.x = jsb_state.getOrientation().x();
+    odom_msg.pose.pose.orientation.y = jsb_state.getOrientation().y();
+    odom_msg.pose.pose.orientation.z = jsb_state.getOrientation().z();
+    odom_msg.pose.pose.orientation.w = jsb_state.getOrientation().w();
+
+    odom_msg.twist.twist.linear.x = jsb_state.kinematics_estimated.twist.linear.x();
+    odom_msg.twist.twist.linear.y = jsb_state.kinematics_estimated.twist.linear.y();
+    odom_msg.twist.twist.linear.z = jsb_state.kinematics_estimated.twist.linear.z();
+    odom_msg.twist.twist.angular.x = jsb_state.kinematics_estimated.twist.angular.x();
+    odom_msg.twist.twist.angular.y = jsb_state.kinematics_estimated.twist.angular.y();
+    odom_msg.twist.twist.angular.z = jsb_state.kinematics_estimated.twist.angular.z();
+
+    if (isENU_) {
+        std::swap(odom_msg.pose.pose.position.x, odom_msg.pose.pose.position.y);
+        odom_msg.pose.pose.position.z = -odom_msg.pose.pose.position.z;
+        std::swap(odom_msg.pose.pose.orientation.x, odom_msg.pose.pose.orientation.y);
+        odom_msg.pose.pose.orientation.z = -odom_msg.pose.pose.orientation.z;
+        std::swap(odom_msg.twist.twist.linear.x, odom_msg.twist.twist.linear.y);
+        odom_msg.twist.twist.linear.z = -odom_msg.twist.twist.linear.z;
+        std::swap(odom_msg.twist.twist.angular.x, odom_msg.twist.twist.angular.y);
+        odom_msg.twist.twist.angular.z = -odom_msg.twist.twist.angular.z;
+    }
+
+    return odom_msg;
+}
 // https://docs.ros.org/jade/api/sensor_msgs/html/point__cloud__conversion_8h_source.html#l00066
 // look at UnrealLidarSensor.cpp UnrealLidarSensor::getPointCloud() for math
 // read this carefully https://docs.ros.org/kinetic/api/sensor_msgs/html/msg/PointCloud2.html
@@ -961,7 +1005,10 @@ ros::Time AirsimROSWrapper::airsim_timestamp_to_ros(const msr::airlib::TTimePoin
     ros::Time cur_time = chrono_timestamp_to_ros(tp);
     return cur_time;
 }
-
+msr::airlib::JSBSimRpcLibClient* AirsimROSWrapper::get_jsbsim_client()
+{
+    return static_cast<msr::airlib::JSBSimRpcLibClient*>(airsim_client_.get());
+}
 msr::airlib::MultirotorRpcLibClient* AirsimROSWrapper::get_multirotor_client()
 {
     return static_cast<msr::airlib::MultirotorRpcLibClient*>(airsim_client_.get());
@@ -1053,7 +1100,21 @@ ros::Time AirsimROSWrapper::update_state()
 
             vehicle_ros->curr_odom = get_odom_msg_from_multirotor_state(drone->curr_drone_state);
         }
-        else {
+        if (airsim_mode_ == AIRSIM_MODE::JSBSIM) {
+            auto jsb = static_cast<JSBSimROS*>(vehicle_ros.get());
+            jsb->curr_jsb_state = get_jsbsim_client()->getJSBSimState(vehicle_ros->vehicle_name);
+            vehicle_time = airsim_timestamp_to_ros(jsb->curr_jsb_state.timestamp);
+            if (!got_sim_time) {
+                curr_ros_time = vehicle_time;
+                got_sim_time = true;
+            }
+
+            vehicle_ros->gps_sensor_msg = get_gps_sensor_msg_from_airsim_geo_point(env_data.geo_point);
+            vehicle_ros->gps_sensor_msg.header.stamp = vehicle_time;
+
+            vehicle_ros->curr_odom = get_odom_msg_from_jsbsim_state(jsb->curr_jsb_state);
+        }
+        if (airsim_mode_ == AIRSIM_MODE::CAR) {
             auto car = static_cast<CarROS*>(vehicle_ros.get());
             car->curr_car_state = get_car_client()->getCarState(vehicle_ros->vehicle_name);
 
@@ -1228,7 +1289,11 @@ void AirsimROSWrapper::update_commands()
             drone->has_vel_cmd = false;
             drone->has_angleRateThr_cmd = false;
         }
-        else {
+        // if (airsim_mode_ == AIRSIM_MODE::JSBSIM) {
+
+
+        // }
+        if (airsim_mode_ == AIRSIM_MODE::CAR) {
             // send control commands from the last callback to airsim
             auto car = static_cast<CarROS*>(vehicle_ros.get());
             if (car->has_car_cmd) {

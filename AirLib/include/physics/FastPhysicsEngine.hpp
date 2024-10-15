@@ -415,18 +415,6 @@ namespace airlib
                 }
             }
 
-            //ysh 2024.05.06
-            //数据生成过程中，设置重力加速度为0，防止无人机下坠
-            if(_replay_flag_)
-            {
-                next_wrench.force = Vector3r::Zero();
-                next_wrench.torque = Vector3r::Zero();
-                next.accelerations.linear = Vector3r::Zero();
-                next.accelerations.angular = Vector3r::Zero();
-                next.twist.linear = Vector3r::Zero();
-                next.twist.angular = Vector3r::Zero();
-            }
-            
             computeNextPose(dt, current.pose, avg_linear, avg_angular, next);
 
             //Utils::log(Utils::stringf("N-VEL %s %f: ", VectorMath::toString(next.twist.linear).c_str(), dt));

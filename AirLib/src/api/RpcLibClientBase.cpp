@@ -243,12 +243,14 @@ __pragma(warning(disable : 4239))
         }
         void RpcLibClientBase::simSetVehiclePose(const Pose& pose, bool ignore_collision, const std::string& vehicle_name)
         {
-            pimpl_->client.call("simSetVehiclePose", RpcLibAdaptorsBase::Pose(pose), ignore_collision, vehicle_name);
+            const RpcLibAdaptorsBase::Pose Pose(pose);
+            pimpl_->client.call("simSetVehiclePose", Pose, ignore_collision, vehicle_name);
         }
 
         void RpcLibClientBase::simSetKinematics(const Kinematics::State& state, bool ignore_collision, const std::string& vehicle_name)
         {
-            pimpl_->client.call("simSetKinematics", RpcLibAdaptorsBase::KinematicsState(state), ignore_collision, vehicle_name);
+            const RpcLibAdaptorsBase::KinematicsState KinematicsState(state);
+            pimpl_->client.call("simSetKinematics", KinematicsState, ignore_collision, vehicle_name);
         }
 
         void RpcLibClientBase::simSetTraceLine(const std::vector<float>& color_rgba, float thickness, const std::string& vehicle_name)
@@ -613,46 +615,6 @@ __pragma(warning(disable : 4239))
         bool RpcLibClientBase::isRecording()
         {
             return pimpl_->client.call("isRecording").as<bool>();
-        }
-
-        void RpcLibClientBase::simUpdateLocalPositionData(const std::string vehicle_name, float locX, float locY,
-            float locZ, int64_t timeStamp, int opFlag)
-        {
-            pimpl_->client.call("simUpdateLocalPositionData",vehicle_name,locX,locY,locZ,timeStamp,opFlag);
-        }
-
-        void RpcLibClientBase::simUpdateLocalRotationData(const std::string vehicle_name, float quatW, float quatX,
-            float quatY, float quatZ, int64_t timeStamp)
-        {
-            pimpl_->client.call("simUpdateLocalRotationData",vehicle_name,quatW,quatX,quatY,quatZ,timeStamp);
-        }
-
-        void RpcLibClientBase::simUpdateLocalDefaultVelocityData(const std::string vehicle_name, float velocity)
-        {
-            pimpl_->client.call("simUpdateLocalDefaultVelocityData",vehicle_name,velocity);
-        }
-
-        void RpcLibClientBase::simUpdateLocalDetectTargetNumData(const std::string vehicle_name, const std::string jsonData)
-        {
-            pimpl_->client.call("simUpdateLocalDetectTargetNumData",vehicle_name,jsonData);
-        }
-
-        void RpcLibClientBase::simUpdateLocalTargetDistanceData(const std::string vehicle_name, float targetDistance,
-            float targetPosX, float targetPosY, float targetPosZ, int targetType, bool bIsDynamic)
-        {
-            pimpl_->client.call("simUpdateLocalTargetDistanceData",vehicle_name,targetDistance,targetPosX,targetPosY,targetPosZ,targetType,bIsDynamic);
-        }
-
-        void RpcLibClientBase::simUpdateLocalDetectTargetPreData(const std::string vehicle_name, float targetPosX,
-            float targetPosY, float targetPosZ, int targetType)
-        {
-            pimpl_->client.call("simUpdateLocalDetectTargetPreData",vehicle_name,targetPosX,targetPosY,targetPosZ,targetType);
-        }
-
-        void RpcLibClientBase::simFireNavMissile(const std::string vehicle_name, float targetLocX, float targetLocY,
-                                                 float targetLocZ, bool bIsRemoteAttack)
-        {
-            pimpl_->client.call("simFireNavMissile",vehicle_name,targetLocX,targetLocY,targetLocZ,bIsRemoteAttack);
         }
 
         void RpcLibClientBase::simSetWind(const Vector3r& wind) const

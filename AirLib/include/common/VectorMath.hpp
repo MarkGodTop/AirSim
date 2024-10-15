@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#define _FOR_LIB_PACKAGE_ 1
-
 #ifndef air_VectorMath_hpp
 #define air_VectorMath_hpp
+
+#define _FOR_LIB_PACKAGE_ 1
 
 #include <cmath>
 #include "common/common_utils/Utils.hpp"
 #include "common_utils/RandomGenerator.hpp"
-
 
 STRICT_MODE_OFF
 //if not using unaligned types then disable vectorization to avoid alignment issues all over the places
@@ -86,8 +85,6 @@ namespace airlib
 
 #endif  //_FOR_LIB_PACKAGE_
 
-
-            
             friend Pose operator-(const Pose& lhs, const Pose& rhs)
             {
                 return VectorMathT::subtract(lhs, rhs);

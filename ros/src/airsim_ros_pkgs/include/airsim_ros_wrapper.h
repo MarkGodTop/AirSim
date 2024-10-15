@@ -14,6 +14,7 @@ STRICT_MODE_OFF //todo what does this do?
 #include "sensors/imu/ImuBase.hpp"
 #include "vehicles/multirotor/api/MultirotorRpcLibClient.hpp"
 #include "vehicles/car/api/CarRpcLibClient.hpp"
+#include "vehicles/jsbsim/api/JSBSimRpcLibClient.hpp"
 #include "yaml-cpp/yaml.h"
 #include <airsim_ros_pkgs/GimbalAngleEulerCmd.h>
 #include <airsim_ros_pkgs/GimbalAngleQuatCmd.h>
@@ -140,6 +141,7 @@ public:
     enum class AIRSIM_MODE : unsigned
     {
         DRONE,
+        JSBSIM,
         CAR
     };
 
@@ -204,7 +206,11 @@ private:
         bool has_car_cmd;
         msr::airlib::CarApiBase::CarControls car_cmd;
     };
-
+    class JSBSimROS : public VehicleROS
+    {
+    public:
+        msr::airlib::JSBSimApiBase::JSBSimState curr_jsb_state;
+    };
     class MultiRotorROS : public VehicleROS
     {
     public:
@@ -290,6 +296,7 @@ private:
     msr::airlib::Quaternionr get_airlib_quat(const geometry_msgs::Quaternion& geometry_msgs_quat) const;
     msr::airlib::Quaternionr get_airlib_quat(const tf2::Quaternion& tf2_quat) const;
     nav_msgs::Odometry get_odom_msg_from_multirotor_state(const msr::airlib::MultirotorState& drone_state) const;
+    nav_msgs::Odometry get_odom_msg_from_jsbsim_state(const msr::airlib::JSBSimApiBase::JSBSimState& jsb_state) const;
     nav_msgs::Odometry get_odom_msg_from_car_state(const msr::airlib::CarApiBase::CarState& car_state) const;
     airsim_ros_pkgs::CarState get_roscarstate_msg_from_car_state(const msr::airlib::CarApiBase::CarState& car_state) const;
     msr::airlib::Pose get_airlib_pose(const float& x, const float& y, const float& z, const msr::airlib::Quaternionr& airlib_quat) const;
@@ -314,6 +321,7 @@ private:
     // Utility methods to convert airsim_client_
     msr::airlib::MultirotorRpcLibClient* get_multirotor_client();
     msr::airlib::CarRpcLibClient* get_car_client();
+    msr::airlib::JSBSimRpcLibClient* get_jsbsim_client();
 
 private:
     ros::NodeHandle nh_;

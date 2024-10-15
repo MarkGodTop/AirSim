@@ -90,16 +90,6 @@ namespace airlib
             //    ImageResponse for cameras and pose returned by getCameraInfo API.
             //    Do we need to convert pose to Global NED frame before returning to clients?
             Pose lidar_pose = params_.relative_pose + ground_truth.kinematics->pose;
-
-            // if(GEngine)
-            // {
-            //     GEngine->AddOnScreenDebugMessage(
-            //         2,
-            //         1.0f,
-            //         FColor::Yellow,
-            //         FString::Printf(TEXT("AirSim Lidar Postition [%f,%f,%f]"),lidar_pose.position.x(),lidar_pose.position.y(),lidar_pose.position.z()));
-            // }
-            
             getPointCloud(params_.relative_pose, // relative lidar pose
                           ground_truth.kinematics->pose, // relative vehicle pose
                           delta_time,
