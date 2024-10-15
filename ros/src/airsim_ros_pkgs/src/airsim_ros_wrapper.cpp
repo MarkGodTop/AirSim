@@ -230,7 +230,7 @@ void AirsimROSWrapper::create_ros_pubs_from_settings_json()
                         curr_image_type == ImageType::Segmentation ||
                         curr_image_type == ImageType::SurfaceNormals ||
                         curr_image_type == ImageType::Infrared) {
-                        current_image_request_vec.push_back(ImageRequest(curr_camera_name, curr_image_type, false, false));
+                        current_image_request_vec.push_back(ImageRequest(curr_camera_name, curr_image_type, false));
                     }
                     // if {DepthPlanar, DepthPerspective,DepthVis, DisparityNormalized}, get float image
                     else {
@@ -1450,7 +1450,7 @@ void AirsimROSWrapper::img_response_timer_cb(const ros::TimerEvent& event)
     try {
         int image_response_idx = 0;
         for (const auto& airsim_img_request_vehicle_name_pair : airsim_img_request_vehicle_name_pair_vec_) {
-            const std::vector<ImageResponse>& img_response = airsim_client_images_.simGetImages(airsim_img_request_vehicle_name_pair.first, airsim_img_request_vehicle_name_pair.second);
+            const std::vector<ImageResponse>& img_response = airsim_client_images_.simGetImages(airsim_img_request_vehicle_name_pair.first, airsim_img_request_vehicle_name_pair.second, false);
 
             if (img_response.size() == airsim_img_request_vehicle_name_pair.first.size()) {
                 process_and_publish_img_response(img_response, image_response_idx, airsim_img_request_vehicle_name_pair.second);
