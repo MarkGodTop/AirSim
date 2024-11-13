@@ -48,7 +48,7 @@ namespace airlib
         }
 
         virtual void initialize() = 0;
-        
+
         virtual bool testLineOfSightToPoint(const GeoPoint& point) const = 0;
 
         virtual Pose getPose() const = 0;
@@ -65,7 +65,22 @@ namespace airlib
         virtual std::string getRecordFileLine(bool is_header_line) const = 0;
         virtual void toggleTrace() = 0;
         virtual void setTraceLine(const std::vector<float>& color_rgba, float thickness) = 0;
-
+        
+        /*  指标python接口
+         *  使用者通过该接口发送测算数据
+         *  UE5端收集数据并将真实数据一起发送至服务器端
+         */
+        virtual void updateLocalPositionData(const float locX, const float locY, const float locZ, const int64_t timeStamp, const int opFlag, const std::string pointName) = 0;
+        virtual void updateLocalRotationData(const float quatW, const float quatX, const float quatY, const float quatZ, const int64_t timeStamp, const std::string pointName) = 0;
+        virtual void updateLocalDefaultVelocityData(const float velocity, const std::string pointName) = 0;
+        virtual void updateLocalDetectTargetNumData(const std::string jsonData, const std::string pointName) = 0;
+        virtual void updateLocalTargetDistanceData(const float distance, const float targetPosX, const float targetPosY, const float targetPosZ, const int targetType, const bool bIsDynamic, const std::string pointName) = 0;
+        virtual void updateLocalDetectTargetPreData(const float targetPosX, const float targetPosY, const float targetPosZ, const int targetType, const std::string pointName) = 0;
+        virtual void updateLocalCheckNaviData(const bool bIsInNoiseAreaByRos, const std::string pointName) = 0;
+        
+        //攻击接口
+        virtual void fireNavMissile(const float targetLocX,const float targetLocY,const float targetLocZ,const bool bIsRemoteAttack) = 0;
+        
         //use pointer here because of derived classes for VehicleSetting
         const AirSimSettings::VehicleSetting* getVehicleSetting() const
         {

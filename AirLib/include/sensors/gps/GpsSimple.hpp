@@ -51,25 +51,25 @@ namespace airlib
         {
             GpsBase::update();
 
-            freq_limiter_.update();
-            eph_filter.update();
-            epv_filter.update();
-
-            if (freq_limiter_.isWaitComplete()) { //update output
-                addOutputToDelayLine(eph_filter.getOutput(), epv_filter.getOutput());
-            }
-
-            delay_line_.update();
-
-            if (freq_limiter_.isWaitComplete())
-                setOutput(delay_line_.getOutput());
+            // freq_limiter_.update();
+            // eph_filter.update();
+            // epv_filter.update();
+            //
+            // if (freq_limiter_.isWaitComplete()) { //update output
+            //     addOutputToDelayLine(eph_filter.getOutput(), epv_filter.getOutput());
+            // }
+            //
+            // delay_line_.update();
+            //
+            // if (freq_limiter_.isWaitComplete())
+            //     setOutput(delay_line_.getOutput());
         }
 
         //*** End: UpdatableState implementation ***//
 
         virtual ~GpsSimple() = default;
 
-    private:
+    protected:
         void addOutputToDelayLine(real_T eph, real_T epv)
         {
             Output output;
@@ -93,7 +93,7 @@ namespace airlib
             delay_line_.push_back(output);
         }
 
-    private:
+    protected:
         typedef std::normal_distribution<> NormalDistribution;
 
         GpsSimpleParams params_;

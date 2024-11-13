@@ -160,6 +160,20 @@ namespace airlib
         void stopRecording();
         bool isRecording();
 
+        /*  python接口
+         *  使用者上传数据接口
+         */
+        void simUpdateLocalPositionData(const std::string vehicle_name = "",float locX=0.0f,float locY=0.0f,float locZ=0.0f,int64_t timeStamp=0,int opFlag=8,std::string pointName="");//默认全局定位准确度
+        void simUpdateLocalRotationData(const std::string vehicle_name = "",float quatW=0.0f,float quatX=0.0f,float quatY=0.0f,float quatZ=0.0f,int64_t timeStamp=0,std::string pointName="");
+        void simUpdateLocalDefaultVelocityData(const std::string vehicle_name = "",float velocity=0.0f,std::string pointName="");
+        void simUpdateLocalDetectTargetNumData(const std::string vehicle_name = "",const std::string jsonData = "",std::string pointName="");
+        void simUpdateLocalTargetDistanceData(const std::string vehicle_name = "",float targetDistance=0.0f,float targetPosX=0.0f,float targetPosY=0.0f,float targetPosZ=0.0f,int targetType=0,bool bIsDynamic=false,std::string pointName="");
+        void simUpdateLocalDetectTargetPreData(const std::string vehicle_name = "",float targetPosX=0.0f,float targetPosY=0.0f,float targetPosZ=0.0f,int targetType=0,std::string pointName="");
+        void simUpdateLocalCheckNaviData(const std::string vehicle_name = "",bool bIsInNoiseAreaByRos=false,std::string pointName="");
+        
+        //攻击接口
+        void simFireNavMissile(const std::string vehicle_name = "",float targetLocX=0.0f,float targetLocY=0.0f,float targetLocZ=0.0f,bool bIsRemoteAttack=false);
+        
         void simSetWind(const Vector3r& wind) const;
         void simSetExtForce(const Vector3r& ext_force) const;
 

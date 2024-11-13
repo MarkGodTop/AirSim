@@ -29,6 +29,9 @@ namespace airlib
 
         virtual void setWind(const Vector3r& wind) { unused(wind); };
         virtual void setExtForce(const Vector3r& ext_force) { unused(ext_force); };
+        virtual void setReplayFlag(const bool bIsForReplay){_replay_flag_ = bIsForReplay;};
+
+        inline static bool _replay_flag_ = false;
     };
 }
 } //namespace

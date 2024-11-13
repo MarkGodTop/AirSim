@@ -33,11 +33,13 @@ namespace airlib
         virtual void setupParams() override
         {
             auto& params = getParams();
-
+            
             // Use connection_info_.model for the model name, see Px4MultiRotorParams for example
 
             // Only Generic for now
-            setupFrameGenericQuad(params);
+
+            check(vehicle_setting_);
+            setupFrameGenericQuad(params,vehicle_setting_->pawn_mass);
         }
 
         virtual const SensorFactory* getSensorFactory() const override

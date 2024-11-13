@@ -37,7 +37,8 @@ namespace airlib
             {
                 latitude = latitude_val;
                 longitude = longitude_val;
-                height = height_val, altitude = altitude_val;
+                height = height_val;
+                altitude = altitude_val;
                 health = health_val;
             }
 

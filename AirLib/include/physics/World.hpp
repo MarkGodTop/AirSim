@@ -25,8 +25,7 @@ namespace airlib
         {
             World::clear();
             setName("World");
-            if(physics_engine_)
-                physics_engine_->setParent(this);
+            physics_engine_->setParent(this);
             if (physics_engine)
                 physics_engine_->clear();
         }
@@ -119,6 +118,12 @@ namespace airlib
             executor_.pause(is_paused);
         }
 
+        void pauseForReplay(bool is_paused)
+        {
+            // executor_.pause(is_paused);
+            physics_engine_->setReplayFlag(is_paused);
+        }
+        
         bool isPaused() const
         {
             return executor_.isPaused();

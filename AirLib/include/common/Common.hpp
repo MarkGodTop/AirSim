@@ -25,7 +25,6 @@ namespace msr
 {
 namespace airlib
 {
-
     //numericals
     typedef float real_T;
     //this is not required for most compilers
@@ -74,6 +73,7 @@ namespace airlib
     {
         return os << vec.x() << "\t" << vec.y() << "\t" << vec.z() << "\t";
     }
+    
 }
 } //namespace
 #endif

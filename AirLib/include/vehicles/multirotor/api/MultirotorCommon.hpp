@@ -16,19 +16,26 @@ namespace airlib
         ForwardOnly
     };
 
+    enum class LandedState : uint
+    {
+        Landed = 0,
+        Flying = 1
+    };
     // Structs for rotor state API
     struct RotorParameters
     {
         real_T thrust = 0;
         real_T torque_scaler = 0;
         real_T speed = 0;
-
+        real_T average_speed = 0;
+        uint64_t update_times = 0;
+        
         RotorParameters()
         {
         }
 
         RotorParameters(const real_T& thrust_val, const real_T& torque_scaler_val, const real_T& speed_val)
-            : thrust(thrust_val), torque_scaler(torque_scaler_val), speed(speed_val)
+            : thrust(thrust_val), torque_scaler(torque_scaler_val), speed(speed_val), average_speed(0) ,update_times(0)
         {
         }
 
@@ -37,6 +44,8 @@ namespace airlib
             thrust = thrust_val;
             torque_scaler = torque_scaler_val;
             speed = speed_val;
+            update_times++;
+            average_speed = average_speed + (speed - average_speed) / (update_times);
         }
     };
 

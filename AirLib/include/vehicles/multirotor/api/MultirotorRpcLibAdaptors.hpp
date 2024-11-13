@@ -15,8 +15,6 @@
 #include "common/common_utils/WindowsApisCommonPre.hpp"
 #include "rpc/msgpack.hpp"
 #include "common/common_utils/WindowsApisCommonPost.hpp"
-#include "rpc/msgpack/adaptor/define.hpp"
-#include "rpc/msgpack/adaptor/define_decl.hpp"
 
 namespace msr
 {
@@ -108,7 +106,7 @@ namespace airlib_rpclib
             KinematicsState kinematics_true;
             GeoPoint gps_location;
             uint64_t timestamp;
-            airlib::LandedState landed_state;
+            msr::airlib::LandedState landed_state;
             RCData rc_data;
             bool ready;
             std::string ready_message;
@@ -143,8 +141,7 @@ namespace airlib_rpclib
 }
 } //namespace
 
-//如果要编译AirLib，则取消下面两行的注释
- MSGPACK_ADD_ENUM(msr::airlib::DrivetrainType);
- MSGPACK_ADD_ENUM(msr::airlib::LandedState);
+MSGPACK_ADD_ENUM(msr::airlib::DrivetrainType);
+MSGPACK_ADD_ENUM(msr::airlib::LandedState);
 
 #endif

@@ -1,14 +1,14 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 //in header only mode, control library is not available
-#include "api/RpcLibAdaptorsBase.hpp"
 #ifndef AIRLIB_HEADER_ONLY
 //RPC code requires C++14. If build system like Unreal doesn't support it then use compiled binaries
 #ifndef AIRLIB_NO_RPC
 //if using Unreal Build system then include precompiled header file first
 
 #include "api/RpcLibServerBase.hpp"
+
 #include "common/Common.hpp"
 STRICT_MODE_OFF
 
@@ -28,6 +28,7 @@ STRICT_MODE_OFF
 #endif
 #include "common/common_utils/WindowsApisCommonPost.hpp"
 
+#include "api/RpcLibAdaptorsBase.hpp"
 #include <functional>
 #include <thread>
 
@@ -511,6 +512,50 @@ namespace airlib
             return getWorldSimApi()->getSettingsString();
         });
 
+        /*  python接口
+         *  使用者上传数据至UE5端
+         */
+        pimpl_->server.bind("simUpdateLocalPositionData",[&](const std::string& vehicle_name,const float locX, const float locY,
+            const float locZ,const int64_t timeStamp,const int opFlag,const std::string& pointName) -> void {
+            return getVehicleSimApi(vehicle_name)->updateLocalPositionData(locX,locY,locZ,timeStamp,opFlag,pointName);  
+        });
+
+        pimpl_->server.bind("simUpdateLocalRotationData",[&](const std::string& vehicle_name,const float quatW, const float quatX,
+            const float quatY, const float quatZ, const int64_t timeStamp,const std::string& pointName) -> void{
+            return getVehicleSimApi(vehicle_name)->updateLocalRotationData(quatW,quatX,quatY,quatZ,timeStamp,pointName);
+        });
+
+        pimpl_->server.bind("simUpdateLocalDefaultVelocityData",[&](const std::string& vehicle_name,const float velocity,const std::string& pointName)->void
+        {
+            return getVehicleSimApi(vehicle_name)->updateLocalDefaultVelocityData(velocity,pointName);   
+        });
+
+        pimpl_->server.bind("simUpdateLocalDetectTargetNumData",[&](const std::string& vehicle_name,const std::string& jsonData,const std::string& pointName)->void
+        {
+           return getVehicleSimApi(vehicle_name)->updateLocalDetectTargetNumData(jsonData,pointName); 
+        });
+
+        pimpl_->server.bind("simUpdateLocalTargetDistanceData",[&](const std::string& vehicle_name,const float targetDistance,const float targetPosX,const float targetPosY,const float targetPosZ,const int targetType,const bool bIsDynamic,const std::string& pointName)->void
+        {
+            return getVehicleSimApi(vehicle_name)->updateLocalTargetDistanceData(targetDistance,targetPosX,targetPosY,targetPosZ,targetType,bIsDynamic,pointName);
+        });
+
+        pimpl_->server.bind("simUpdateLocalDetectTargetPreData",[&](const std::string& vehicle_name,const float targetPosX,const float targetPosY,const float targetPosZ,const int targetType,const std::string& pointName)->void
+        {
+            return getVehicleSimApi(vehicle_name)->updateLocalDetectTargetPreData(targetPosX,targetPosY,targetPosZ,targetType,pointName);   
+        });
+
+        pimpl_->server.bind("simUpdateLocalCheckNaviData",[&](const std::string& vehicle_name,const bool bIsInNoiseAreaByRos,const std::string& pointName)->void
+        {
+            return getVehicleSimApi(vehicle_name)->updateLocalCheckNaviData(bIsInNoiseAreaByRos,pointName);   
+        });
+        
+        //攻击接口
+        pimpl_->server.bind("simFireNavMissile",[&](const std::string& vehicle_name,const float targetLocX,const float targetLocY,const float targetLocZ,const bool bIsRemoteAttack)->void
+        {
+           return getVehicleSimApi(vehicle_name)->fireNavMissile(targetLocX,targetLocY,targetLocZ,bIsRemoteAttack); 
+        });
+        
         //if we don't suppress then server will bomb out for exceptions raised by any method
         pimpl_->server.suppress_exceptions(true);
     }

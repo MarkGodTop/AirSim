@@ -25,7 +25,6 @@ namespace msr
 {
 namespace airlib
 {
-
     /*
 Vehicle controller allows to obtain state from vehicle and send control commands to the vehicle.
 State can include many things including sensor data, logs, estimated state from onboard computer etc.

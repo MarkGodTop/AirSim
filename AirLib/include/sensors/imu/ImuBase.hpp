@@ -15,7 +15,7 @@ namespace airlib
     {
     public:
         ImuBase(const std::string& sensor_name = "")
-            : SensorBase(sensor_name), output_()
+            : SensorBase(sensor_name)
         {
         }
 
@@ -44,6 +44,17 @@ namespace airlib
             return output_;
         }
 
+        void AddConstNoise()
+        {
+            output_.angular_velocity.x() += Randomfloat(-AngleVelocityRandomNoise,AngleVelocityRandomNoise);
+            output_.angular_velocity.y() += Randomfloat(-AngleVelocityRandomNoise,AngleVelocityRandomNoise);
+            output_.angular_velocity.z() += Randomfloat(-AngleVelocityRandomNoise,AngleVelocityRandomNoise);
+
+            output_.linear_acceleration.x() += Randomfloat(-LinearAccelerationRandomNoise,LinearAccelerationRandomNoise);
+            output_.linear_acceleration.y() += Randomfloat(-LinearAccelerationRandomNoise,LinearAccelerationRandomNoise);
+            output_.linear_acceleration.z() += Randomfloat(-LinearAccelerationRandomNoise,LinearAccelerationRandomNoise);
+        };
+        
     protected:
         void setOutput(const Output& output)
         {
@@ -52,6 +63,15 @@ namespace airlib
 
     private:
         Output output_;
+
+        float AngleVelocityRandomNoise = 0.5f;
+        float LinearAccelerationRandomNoise = 5.0f;
+
+        float Randomfloat(float min, float max)
+        {
+            const float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            return min + r * (max - min);
+        }
     };
 }
 } //namespace

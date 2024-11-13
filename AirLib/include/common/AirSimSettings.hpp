@@ -36,22 +36,13 @@ namespace airlib
         static constexpr char const* kVehicleTypeArduRover = "ardurover";
         static constexpr char const* kVehicleTypeComputerVision = "computervision";
 
-        static constexpr char const* kVehicleTypeArduPlane = "arduplane";
-        static constexpr char const* kVehicleTypePX4Plane = "px4plane";
-        static constexpr char const* kVehicleTypePlaneFlight = "planeflight";
-        static constexpr char const* kVehicleTypeFixedWing = "fixedwing";
-        static constexpr char const* kVehicleTypeJSBSim = "defaultjsbsim";
-
         static constexpr char const* kVehicleInertialFrame = "VehicleInertialFrame";
         static constexpr char const* kSensorLocalFrame = "SensorLocalFrame";
 
         static constexpr char const* kSimModeTypeMultirotor = "Multirotor";
-        static constexpr char const* kSimModeTypeJSBSim = "JSBSim";
         static constexpr char const* kSimModeTypeCar = "Car";
         static constexpr char const* kSimModeTypeComputerVision = "ComputerVision";
-        static constexpr char const* kSimModeFixedWing = "FixedWing";
-        static constexpr char const* kSimModeJSBSim = "JSBSim";
-        
+
         struct SubwindowSetting
         {
             int window_index;
@@ -151,7 +142,7 @@ namespace airlib
 
             int image_type = 0;
 
-            unsigned int width = 256, height = 144; //960 X 540
+            unsigned int width = 800, height = 600; //960 X 540(default:256*144)
             float fov_degrees = Utils::nan<float>(); //90.0f
             int auto_exposure_method = -1; //histogram
             float auto_exposure_speed = Utils::nan<float>(); // 100.0f;
@@ -209,7 +200,8 @@ namespace airlib
             //nan means keep the default values set in components
             Vector3r position = VectorMath::nanVector();
             Rotation rotation = Rotation::nanRotation();
-
+            bool bIsCarried = false;
+            
             GimbalSetting gimbal;
             CaptureSettingsMap capture_settings;
             NoiseSettingsMap noise_settings;
@@ -277,6 +269,7 @@ namespace airlib
             //optional
             std::string default_vehicle_state;
             std::string pawn_path;
+            float pawn_mass = 1.0f;
             bool allow_api_always = true;
             bool auto_create = true;
             bool enable_collision_passthrough = false;
@@ -502,7 +495,7 @@ namespace airlib
             auto vehicle_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting(vehicle_name, vehicle_type));
             vehicle_setting->position = pose.position;
             vehicle_setting->pawn_path = pawn_path;
-
+            
             vehicle_setting->sensors = sensor_defaults;
 
             VectorMath::toEulerianAngle(pose.orientation, vehicle_setting->rotation.pitch, vehicle_setting->rotation.roll, vehicle_setting->rotation.yaw);
@@ -519,6 +512,10 @@ namespace airlib
             return it->second.get();
         }
 
+        static bool createBooleanSetting(const Settings& settings_json, const bool& default_boolean)
+        {
+            return settings_json.getBool("IsCarried",default_boolean);
+        }
         static Vector3r createVectorSetting(const Settings& settings_json, const Vector3r& default_vec)
         {
             return Vector3r(settings_json.getFloat("X", default_vec.x()),
@@ -613,10 +610,8 @@ namespace airlib
 
             physics_engine_name = settings_json.getString("PhysicsEngineName", "");
             if (physics_engine_name == "") {
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeFixedWing)
+                if (simmode_name == kSimModeTypeMultirotor)
                     physics_engine_name = "FastPhysicsEngine";
-                else if(simmode_name == kSimModeJSBSim)
-                    physics_engine_name = "JSBSimPhysicsEngine";
                 else
                     physics_engine_name = "PhysX"; //this value is only informational for now
             }
@@ -844,6 +839,9 @@ namespace airlib
             //required settings_json
             vehicle_setting->vehicle_type = vehicle_type;
 
+            //vehicle mass
+            vehicle_setting->pawn_mass = settings_json.getFloat("EquipmentMass",1.0f);
+            
             //optional settings_json
             vehicle_setting->pawn_path = settings_json.getString("PawnPath", "");
             vehicle_setting->default_vehicle_state = settings_json.getString("DefaultVehicleState", "");
@@ -900,17 +898,6 @@ namespace airlib
                 cv_setting->sensors = sensor_defaults;
                 vehicles[cv_setting->vehicle_name] = std::move(cv_setting);
             }
-            else if (simmode_name == kSimModeFixedWing){
-                auto fixedwing_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("FixedWing",kSimModeFixedWing));
-                fixedwing_setting->sensors = sensor_defaults;
-                vehicles[fixedwing_setting->vehicle_name] = std::move(fixedwing_setting);
-            }
-            else if (simmode_name == kSimModeJSBSim)
-            {
-                auto jsbsim_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("JSBSim",kSimModeJSBSim));
-                jsbsim_setting->sensors = sensor_defaults;
-                vehicles[jsbsim_setting->vehicle_name] = std::move(jsbsim_setting);
-            }
             else {
                 throw std::invalid_argument(Utils::stringf(
                                                 "Unknown SimMode: %s, failed to set default vehicle settings", simmode_name.c_str())
@@ -937,7 +924,7 @@ namespace airlib
                 for (const auto& key : keys) {
                     msr::airlib::Settings child;
                     vehicles_child.getChild(key, child);
-                    vehicles[key] = createVehicleSetting(simmode_name, child, key, sensor_defaults, camera_defaults);
+                    vehicles[key] = createVehicleSetting(simmode_name, child/*settings_json*/, key, sensor_defaults, camera_defaults);
                 }
             }
         }
@@ -950,13 +937,9 @@ namespace airlib
             pawn_paths.emplace("DefaultCar",
                                PawnPath("Class'/AirSim/VehicleAdv/SUV/SuvCarPawn.SuvCarPawn_C'"));
             pawn_paths.emplace("DefaultQuadrotor",
-                               PawnPath("/Script/Engine.Blueprint'/Game/Blueprints/Vehicles/BP_ReplayPawn.BP_ReplayPawn_C'"));
+                               PawnPath("Class'/AirSim/Blueprints/BP_FlyingPawn.BP_FlyingPawn_C'"));
             pawn_paths.emplace("DefaultComputerVision",
                                PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
-            pawn_paths.emplace("DefaultFixedWing",
-                                PawnPath("/Script/Engine.Blueprint'/AirSim/Blueprints/BP_FixedWingPawn.BP_FixedWingPawn_C'"));
-            pawn_paths.emplace("DefaultJSBSim",
-                                PawnPath("/Script/Engine.Blueprint'/Game/Blueprints/Vehicles/BP_JSBSimPawnF16.BP_JSBSimPawnF16_C'"));
         }
 
         static void loadPawnPaths(const Settings& settings_json, std::map<std::string, PawnPath>& pawn_paths)
@@ -1103,7 +1086,8 @@ namespace airlib
 
             setting.position = createVectorSetting(settings_json, setting.position);
             setting.rotation = createRotationSetting(settings_json, setting.rotation);
-
+            setting.bIsCarried = createBooleanSetting(settings_json, setting.bIsCarried);
+            
             loadCaptureSettings(settings_json, setting.capture_settings);
             loadNoiseSettings(settings_json, setting.noise_settings);
             Settings json_gimbal;
